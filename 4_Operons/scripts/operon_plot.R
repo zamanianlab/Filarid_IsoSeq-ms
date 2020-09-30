@@ -1,28 +1,28 @@
 library(cowplot)
 library(ggplot)
 
-A <- readRDS(here('..', 'plots', 'Fig4A.rds')) + theme(axis.title = element_text(size = 10),
+A <- readRDS(here('..', 'plots', 'Fig5A.rds')) + theme(axis.title = element_text(size = 10),
                                                        axis.text = element_text(size = 8),
                                                        legend.position = 'none')
 
-B <- readRDS(here('..', 'plots', 'Fig4B.rds')) + theme(axis.title = element_text(size = 10),
+B <- readRDS(here('..', 'plots', 'Fig5B.rds')) + theme(axis.title = element_text(size = 10),
                                                        axis.text = element_text(size = 8),
                                                        legend.position = 'none')
 
-C <- readRDS(here('..', 'plots', 'Fig4C.rds')) + theme(axis.title = element_text(size = 10),
+C <- readRDS(here('..', 'plots', 'Fig5C.rds')) + theme(axis.title = element_text(size = 10),
                                                        axis.text = element_text(size = 8),
                                                        legend.position = 'none')
 
-D <- readRDS(here('..', 'plots', 'Fig4D.rds')) + theme(axis.title = element_text(size = 10),
+D <- readRDS(here('..', 'plots', 'Fig5D.rds')) + theme(axis.title = element_text(size = 10),
                                                        axis.text = element_text(size = 8))
 
-E <- readRDS(here('..', 'plots', 'Fig4E.rds'))  + theme(axis.title = element_text(size = 10),
+E <- readRDS(here('..', 'plots', 'Fig5E.rds'))  + theme(axis.title = element_text(size = 10),
                                                         axis.text = element_text(size = 8))
 
-F <- readRDS(here('..', 'plots', 'Fig4F.rds'))  + theme(axis.title = element_text(size = 10),
+F <- readRDS(here('..', 'plots', 'Fig5F.rds'))  + theme(axis.title = element_text(size = 10),
                                                         axis.text = element_text(size = 8))
 
-G <- readRDS(here('..', 'plots', 'Fig4G.rds'))  + theme(axis.title = element_text(size = 10),
+G <- readRDS(here('..', 'plots', 'Fig5G.rds'))  + theme(axis.title = element_text(size = 10),
                                                         axis.text = element_text(size = 8))
 
 top <- plot_grid(A, B, C,
@@ -50,5 +50,5 @@ final <- plot_grid(top_legend, NULL, middle, NULL, bottom,
                    nrow = 5, rel_heights = c(1, 0.05, 1, 0.05, 1.1))
 
 
-save_plot(here('..', 'plots', 'Fig4.pdf'), final, base_height = 8.75, base_width = 7.5)
-save_plot(here('..', 'plots', 'Fig4.png'), final, base_height = 8.75, base_width = 7.5)
+save_plot(here('..', 'plots', 'Fig5.pdf'), final, base_height = 8.75, base_width = 7.5)
+save_plot(here('..', 'plots', 'Fig5.png'), final, base_height = 8.75, base_width = 7.5)

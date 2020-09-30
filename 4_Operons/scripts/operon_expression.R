@@ -93,7 +93,7 @@ operons_rnaseq <- left_join(final_operonic_genes, rnaseq, by = "gene_id") %>%
   select(gene_id, operon_id, sample_name, distance, cistron, expression) %>%
   group_by(gene_id, operon_id, distance, sample_name, cistron) %>%
   summarize(mean_expression = mean(expression)) %>%
-  ungroup()  %>%
+  ungroup() %>%
   # convert to wide format where cistrons 1 and 2 are in separate columns
   pivot_wider(id_cols = c(operon_id, distance, sample_name), 
               names_from = cistron, 
@@ -146,7 +146,7 @@ lm_tidied <- unnest(lm_model, tidied) %>%
 # Plot --------------------------------------------------------------------
 
 example <- group_by(full, name, type) %>%
-  filter(name %in% c('BMOP2395', 'BMPSO2310')) %>%
+  filter(name %in% c('BMOP2395', 'BMPSO3802')) %>%
   left_join(., distinct(rnaseq, sample_name, dev_stage_s)) %>%
   mutate(label = case_when(
     dev_stage_s == 'MF/L1' ~ 'L1',
@@ -163,7 +163,7 @@ example_line <- left_join(example, lm_tidied) %>%
   left_join(., lm_glanced) %>%
   dplyr::select(name:r.squared) %>%
   ungroup() %>%
-  mutate(x = 450, y = c(500, 430))
+  mutate(x = 50, y = c(200, 150))
 
 (example_plot <- ggplot(example, aes(x = cistron_1, y = cistron_2)) +
     geom_abline(data = example_line, aes(slope = cistron_1, intercept = intercept, color = type)) +
@@ -183,9 +183,9 @@ example_line <- left_join(example, lm_tidied) %>%
     ) +
     NULL)
 
-save_plot(here('..', 'plots', "Fig4E.pdf"), example_plot, base_height = 5, base_width = 5)
+save_plot(here('..', 'plots', "Fig5E.pdf"), example_plot, base_height = 5, base_width = 5)
 
-saveRDS(example_plot, here('..', 'plots', "Fig4E.rds"))
+saveRDS(example_plot, here('..', 'plots', "Fig5E.rds"))
 
 (rsquare_plot <- ggplot(filter(lm_glanced, !is.na(r.squared))) +
     geom_density_ridges(aes(x = r.squared, y = type, fill = type, height = ..density..),
@@ -204,11 +204,11 @@ saveRDS(example_plot, here('..', 'plots', "Fig4E.rds"))
     )
 )
 
-save_plot(here('..', 'plots', "Fig4F.pdf"), rsquare_plot, base_height = 3, base_width = 5)
+save_plot(here('..', 'plots', "Fig5F.pdf"), rsquare_plot, base_height = 3, base_width = 5)
 
-saveRDS(rsquare_plot, here('..', 'plots', "Fig4F.rds"))
+saveRDS(rsquare_plot, here('..', 'plots', "Fig5F.rds"))
 
-(rsquare_distance <- ggplot(filter(lm_glanced, !is.na(statistic)), aes(x = distance_bin, y = r.squared)) +
+(rsquare_distance <- ggplot(filter(lm_glanced, !is.na(statistic), !is.na(distance)), aes(x = distance_bin, y = r.squared)) +
     gghalves::geom_half_boxplot(aes(fill = type), position = 'dodge', outlier.shape = NA, alpha = 0.9) +
     gghalves::geom_half_point(aes(color = type), transformation = position_jitter(height = 0), alpha = 0.7) +
     scale_fill_manual(values = c('black', 'grey')) +
@@ -223,7 +223,7 @@ saveRDS(rsquare_plot, here('..', 'plots', "Fig4F.rds"))
     ) +
     NULL)
 
-save_plot(here('..', 'plots', "Fig4G.pdf"), rsquare_distance, base_height = 4, base_width = 8)
+save_plot(here('..', 'plots', "Fig5G.pdf"), rsquare_distance, base_height = 4, base_width = 8)
 
-saveRDS(rsquare_distance, here('..', 'plots', "Fig4G.rds"))
+saveRDS(rsquare_distance, here('..', 'plots', "Fig5G.rds"))
 

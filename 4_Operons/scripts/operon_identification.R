@@ -167,95 +167,37 @@ filtered_operons_blast <- left_join(filtered_operons, ce_blast)
 # filtered_operons_blast %>% googlesheets4::sheet_append(sheet)
 # operon_blast %>% googlesheets4::sheet_append(sheet, sheet = 'operon_blast')
 
-# read in the Google Sheet with manual curation
-curated_operons <- googlesheets4::read_sheet("https://docs.google.com/spreadsheets/d/1v3NNMVF2myXLXz02QqVyDNCZ23kRhXMERDWmTof7tEg/edit#gid=1101160176") %>%
-  filter(!is.na(distance)) %>%
-  group_by(operon_id) %>%
-  mutate(is_operon = case_when(
-    # make the remarks consistent across each cistron
-    remark == "NULL" ~ as.character(first(remark)),
-    remark == "TRUE" ~ "TRUE",
-    remark == "FALSE" ~ "FALSE",
-    remark == "Unknown" ~ "Unknown",
-    remark == "Merge" ~ "Merge"
-  )) %>%
-  select(operon_id, is_operon, notes) %>%
-  # get the assembly-annotated operons that need to be deprecated
-  mutate(deprecate = case_when(
-    str_detect(notes, 'deprecate') == TRUE ~ str_extract(notes, "BMOP[0-9]*"),
-    str_detect(notes, 'deprecate') == FALSE ~ NA_character_
-  )) %>%
-  # categorize operons into New (entirely novel) or Shared (already assembly-annotated)
-  mutate(operon_type = case_when(
-    is_operon == "TRUE" & str_detect(notes, "BMOP") ~ 'Shared',
-    is_operon == "TRUE" & !str_detect(notes, "BMOP") ~ 'New',
-    TRUE ~ NA_character_
-  )) %>%
-  # keep the assembly-annotated operon_id
-  mutate(operon_id = case_when(
-    operon_type == 'Shared' ~ str_extract(notes, "BMOP[0-9]*"),
-    operon_type == 'New' ~ operon_id,
-    TRUE ~ NA_character_
-  ))
+# read in the Google Sheet with manual curation and the official operon_id's
+curations <- googlesheets4::read_sheet("https://docs.google.com/spreadsheets/d/1wwIxXf0ELtPqPCZo5-lra7rEIT2fZez6rBk9I-qQg3U/edit#gid=316400157") %>%
+  janitor::clean_names()
 
-s3_table <- googlesheets4::read_sheet("https://docs.google.com/spreadsheets/d/1v3NNMVF2myXLXz02QqVyDNCZ23kRhXMERDWmTof7tEg/edit#gid=1101160176") 
+curated_operons <- curations %>% 
+  filter(str_detect(operon_id, "BM*") == TRUE) 
 
-s3_table_w <- s3_table %>%
-  select(-distance, -cds_start, -cds_end, -support, -blast_hit) %>%
-  group_by(operon_id) %>%
-  mutate(is_operon = case_when(
-    # make the remarks consistent across each cistron
-    remark == "NULL" ~ as.character(first(remark)),
-    remark == "TRUE" ~ "TRUE",
-    remark == "FALSE" ~ "FALSE",
-    remark == "Unknown" ~ "Unknown",
-    remark == "Merge" ~ "Merge"
-  )) %>%
-  group_by(operon_id) %>%
-  filter(is_operon %in% c(TRUE, "Merge")) %>%
-  # get the assembly-annotated operons that need to be deprecated
-  mutate(deprecate = case_when(
-    str_detect(notes, 'deprecate') == TRUE ~ str_extract(notes, "BMOP[0-9]*"),
-    str_detect(notes, 'deprecate') == FALSE ~ NA_character_
-  )) %>%
-  group_by(operon_id) %>%
-  arrange(operon_id, cistron) %>%
-  mutate(deprecate = case_when(
-    is.na(deprecate) ~ first(deprecate),
-    TRUE ~ deprecate
-  )) %>%
-  # categorize operons into New (entirely novel) or Shared (already assembly-annotated)
-  mutate(operon_type = case_when(
-    is_operon == "TRUE" & str_detect(notes, "BMOP") ~ 'Shared',
-    is_operon == "TRUE" & !str_detect(notes, "BMOP") ~ 'New',
-    TRUE ~ NA_character_
-  )) %>%
-  mutate(operon_type = case_when(
-    is.na(operon_type) ~ first(operon_type),
-    TRUE ~ operon_type
-  )) %>%
-  mutate(notes = case_when(
-    is.na(notes) ~ first(notes),
-    TRUE ~ notes
-  )) %>%
-  # keep the assembly-annotated operon_id
-  mutate(operon_id = case_when(
-    operon_type == 'Shared' ~ str_extract(notes, "BMOP[0-9]*"),
-    operon_type == 'New' ~ operon_id,
-    is_operon == "Merge" & !is.na(deprecate) ~ deprecate,
-    is_operon == "Merge" & is.na(deprecate) ~ NA_character_,
-    TRUE ~ operon_id
-  )) %>%
-  mutate(operon_type = case_when(
-    is_operon == "Merge" ~ "Merge",
-    TRUE ~ operon_type
-  )) %>%
-  select(operon_id, operon_type, scaffold, strand, gene_id, transcript_id, notes) %>%
-  distinct() %>%
-  arrange(operon_type, operon_id)
+operon_curation_summary <- curated_operons %>% 
+  group_by(operon_id) %>% 
+  filter(curation_type != 'Killed') %>% 
+  filter(row_number() == 1) %>% 
+  ungroup() %>% 
+  group_by(curation_type) %>% 
+  distinct(operon_id) %>% 
+  summarise(Count = n())
 
-write_csv(s3_table_w, here('..', 'supp_data', 'S3_Table.csv'))
+merge_curation_summary <- curations %>% 
+  filter(str_detect(operon_id, "MERGE") == TRUE) %>% 
+  group_by(operon_id) %>% 
+  filter(curation_type != "Killed", row_number() == 1) %>% 
+  ungroup() %>% 
+  group_by(curation_type) %>% 
+  distinct(operon_id) %>% 
+  summarise(Count = n())
 
+# transfer over official id's
+bed_operons <- ungroup(bed_operons) %>% 
+  select(-operon_id) %>% 
+  left_join(., select(curated_operons, operon_id, gene_id, transcript_id)) %>% 
+  group_by(operon_id, gene_id, distance, scaffold, strand, transcript_id, cds_start, cds_end, support) %>% 
+  summarise(cistron = min(cistron))
 
 # Get operons from Bmal-4.0 -----------------------------------------------
 
@@ -300,16 +242,26 @@ assembly_operons <- read_delim(here('..', 'data', "assembly_operons.bed"),
   arrange(distance)
 
 # create final list of B. malayi operons
-final_operons <- filter(curated_operons, operon_type %in% c('Shared', 'New')) %>%
+final_operons <- curated_operons %>% 
+  group_by(operon_id) %>% 
+  mutate(operon_type = case_when(
+    curation_type %in% 'Novel operon' ~ 'Novel',
+    curation_type %in% 'No change' ~ 'Shared',
+    curation_type %in% 'Merge & Keep' ~ 'Shared',
+    curation_type %in% 'Gene added' ~ 'Shared',
+    curation_type %in% 'Model correction' ~ 'Shared'
+  )) %>% 
+  filter(!is.na(operon_type)) %>% 
   select(operon_id, operon_type) %>%
+  distinct() %>% 
   bind_rows(., 
-            distinct(select(ungroup(assembly_operons), operon_id)) %>% mutate(operon_type = 'Assembly')) %>%
-  # remove operons that were fragmented genes and should be deprecated
-  filter(!operon_id %in% curated_operons$deprecate) %>%
+            distinct(select(filter(ungroup(assembly_operons), !operon_id %in% final_operons$operon_id),
+                   operon_id) %>% mutate(operon_type = 'Assembly'))) %>% 
   mutate(species = 'B. malayi')
 
-final_operonic_genes <- left_join(final_operons, bind_rows(assembly_operons, select(bed_operons, -isoform, -support))) %>%
-  mutate(operon_id = as.character(operon_id))
+final_operonic_genes <- left_join(final_operons, bind_rows(assembly_operons, select(filter(bed_operons, !operon_id %in% assembly_operons$operon_id), -support))) %>%
+  mutate(operon_id = as.character(operon_id)) %>% 
+  distinct()
 
 saveRDS(final_operonic_genes, here('..', 'data', "final_operonic_genes.rds"))
 
@@ -427,12 +379,12 @@ unloadNamespace('biomaRt')
 # Plotting ----------------------------------------------------------------
 
 plot_operons <- bind_rows(final_operonic_genes, non_operonic_genes, ce_operons_cds, ce_non_operons) %>%
-  mutate(operon_type = factor(operon_type, levels = c('New', 'Shared', 'Assembly', 'Monocistron')))
+  mutate(operon_type = factor(operon_type, levels = c('Novel', 'Shared', 'Assembly', 'Monocistron')))
 
 # stacked bar comparing operons already annotated in assembly and new/shared operons from Iso-Seq
 (comparison <- ggplot(plot_operons, aes(x = species, fill = operon_type)) +
     geom_bar(alpha = 0.95) +
-    scale_fill_manual(values = c(lacroix_palette("PassionFruit", 3), 'grey'), labels = c('New', 'Iso-Seq confirmed', 'Assembly annotated', 'Non-operonic')) +
+    scale_fill_manual(values = c(lacroix_palette("PassionFruit", 3), 'grey'), labels = c('Novel', 'Iso-Seq confirmed', 'Assembly annotated', 'Non-operonic')) +
     scale_y_continuous(expand = c(0, 0)) +
     labs(y = "Total Genes") +
     theme_minimal() +
@@ -445,13 +397,13 @@ plot_operons <- bind_rows(final_operonic_genes, non_operonic_genes, ce_operons_c
     NULL
 )
 
-save_plot(here('..', 'plots', "Fig4A.pdf"), comparison, base_width = 4)
+save_plot(here('..', 'plots', "Fig5A.pdf"), comparison, base_width = 4)
 
-saveRDS(comparison, here('..', 'plots', "Fig4A.rds"))
+saveRDS(comparison, here('..', 'plots', "Fig5A.rds"))
 
 # stacked bar of which cistrons have orthologs in Ce
 (ortholog_plot <- ggplot(ortholog_summary) +
-    geom_col(aes(x = ortholog_type, y = total_genes, fill = factor(operon_type, levels = c('New', 'Shared', 'Assembly'))),
+    geom_col(aes(x = ortholog_type, y = total_genes, fill = factor(operon_type, levels = c('Novel', 'Shared', 'Assembly'))),
              alpha = 0.95) +
     labs(y = "Total Genes") +
     scale_fill_manual(values = c(lacroix_palette("PassionFruit", 3)),
@@ -469,9 +421,9 @@ saveRDS(comparison, here('..', 'plots', "Fig4A.rds"))
     NULL
 )
 
-save_plot(here('..', 'plots', 'Fig4B.pdf'), ortholog_plot, base_width = 4)
+save_plot(here('..', 'plots', 'Fig5B.pdf'), ortholog_plot, base_width = 4)
 
-saveRDS(ortholog_plot, here('..', 'plots', 'Fig4B.rds'))
+saveRDS(ortholog_plot, here('..', 'plots', 'Fig5B.rds'))
 
 # median intergenic distances by type
 type_median <- filter(plot_operons, species == "B. malayi") %>% 
@@ -499,9 +451,9 @@ type_median <- filter(plot_operons, species == "B. malayi") %>%
     ) +
     NULL)
 
-save_plot(here('..', 'plots', 'Fig4C.pdf'), type_histogram, base_width = 6)
+save_plot(here('..', 'plots', 'Fig5C.pdf'), type_histogram, base_width = 6)
 
-saveRDS(type_histogram, here('..', 'plots', 'Fig4C.rds'))
+saveRDS(type_histogram, here('..', 'plots', 'Fig5C.rds'))
 
 # median intercistronic distances by species
 species_median <- filter(plot_operons, operon_type != "Monocistron") %>%
@@ -532,6 +484,6 @@ plot_operons <- plot_operons %>%
     NULL
 )
 
-save_plot(here('..', 'plots', 'Fig4D.pdf'), species_histogram, base_width = 4)
+save_plot(here('..', 'plots', 'Fig5D.pdf'), species_histogram, base_width = 4)
 
-saveRDS(species_histogram, here('..', 'plots', 'Fig4D.rds'))
+saveRDS(species_histogram, here('..', 'plots', 'Fig5D.rds'))
