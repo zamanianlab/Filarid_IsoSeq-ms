@@ -109,9 +109,9 @@ structural_plot <- ggplot(structural_summary, aes(x = structural_category)) +
   ) +
   NULL
 
-save_plot(here('..', 'plots', "Fig1E.pdf"), structural_plot, base_width = 8.5, base_height = 4)
+save_plot(here('..', 'plots', "Fig2E.pdf"), structural_plot, base_width = 8.5, base_height = 4)
 
-saveRDS(structural_plot, here('..', 'plots', 'Fig1E.rds'))
+saveRDS(structural_plot, here('..', 'plots', 'Fig2E.rds'))
 
 # Tallies -----------------------------------------------------------------
 
@@ -146,9 +146,9 @@ ccs_by_sex <- ggplot(total) +
   ) +
   NULL
 
-save_plot(here('..', 'plots', "Fig1A.pdf"), ccs_by_sex, base_width = 3, base_height = 3)
+save_plot(here('..', 'plots', "Fig2A.pdf"), ccs_by_sex, base_width = 3, base_height = 3)
 
-saveRDS(ccs_by_sex, here('..', 'plots', 'Fig1A.rds'))
+saveRDS(ccs_by_sex, here('..', 'plots', 'Fig2A.rds'))
 
 # collapse into reads with identitical structure and summed by sex (1 means that isoform is found in that sex, 0 means it isn't or it's in both)
 transcripts_mapped <- group_by(classifications, species, chrom, associated_gene, associated_transcript) %>%
@@ -192,9 +192,9 @@ transcripts_by_sex <- ggplot(total_transcripts_mapped) +
   ) +
   NULL
 
-save_plot(here('..', 'plots', "Fig1C.pdf"), transcripts_by_sex, base_width = 3, base_height = 3)
+save_plot(here('..', 'plots', "Fig2C.pdf"), transcripts_by_sex, base_width = 3, base_height = 3)
 
-saveRDS(transcripts_by_sex, here('..', 'plots', 'Fig1C.rds'))
+saveRDS(transcripts_by_sex, here('..', 'plots', 'Fig2C.rds'))
 
 #  reference genes did we mapped in each sex
 gene_summary <- ungroup(classifications) %>%
@@ -239,9 +239,9 @@ genes_by_sex <- ggplot(gene_summary) +
   ) +
   NULL
 
-save_plot(here('..', 'plots', "Fig1B.pdf"), genes_by_sex, base_width = 3, base_height = 3)
+save_plot(here('..', 'plots', "Fig2B.pdf"), genes_by_sex, base_width = 3, base_height = 3)
 
-saveRDS(genes_by_sex, here('..', 'plots', 'Fig1B.rds'))
+saveRDS(genes_by_sex, here('..', 'plots', 'Fig2B.rds'))
 
 # Gene model extension ----------------------------------------------------
 
@@ -322,9 +322,9 @@ extended_five <- ggplot(classifications,
   ) +
   NULL
 
-save_plot(here('..', 'plots', "Fig2A.pdf"), extended_five, base_width = 5, base_height = 3)
+save_plot(here('..', 'plots', "Fig3A.pdf"), extended_five, base_width = 5, base_height = 3)
 
-saveRDS(extended_five, here('..', 'plots', 'Fig2A.rds'))
+saveRDS(extended_five, here('..', 'plots', 'Fig3A.rds'))
 
 # What fraction of FSM + ISM had extended 3' UTR?
 percent_true_tts <- group_by(filter(classifications, structural_category %in% c("Full-Splice Match", "Incomplete-Splice Match")), species,  structural_category) %>%
@@ -358,17 +358,17 @@ extended_three <- ggplot(classifications,
   ) +
   NULL
 
-save_plot(here('..', 'plots', "Fig2B.pdf"), extended_three, base_width = 5, base_height = 3)
+save_plot(here('..', 'plots', "Fig3B.pdf"), extended_three, base_width = 5, base_height = 3)
 
-saveRDS(extended_three, here('..', 'plots', 'Fig2B.rds'))
+saveRDS(extended_three, here('..', 'plots', 'Fig3B.rds'))
 
 legend <- get_legend(extended_five + theme(legend.position = "bottom", legend.title = element_blank()))
 
 transcriptional_lengthiness <- plot_grid(extended_five, extended_three, nrow = 2, labels = "AUTO", label_size = 12)
 transcriptional_lengthiness <- plot_grid(transcriptional_lengthiness, legend, nrow = 2, rel_heights = c(1, 0.1))
 
-save_plot(here('..', 'plots', "Fig2.pdf"), transcriptional_lengthiness, base_width = 5, base_height = 5)
-save_plot(here('..', 'plots', "Fig2.png"), transcriptional_lengthiness, base_width = 5, base_height = 5)
+save_plot(here('..', 'plots', "Fig3.pdf"), transcriptional_lengthiness, base_width = 5, base_height = 5)
+save_plot(here('..', 'plots', "Fig3.png"), transcriptional_lengthiness, base_width = 5, base_height = 5)
 
 
 # Junctions ---------------------------------------------------------------
@@ -465,9 +465,9 @@ rel_junctions_coords <- ggplot(filter(junction_features,
   ) +
   NULL
 
-save_plot(here('..', 'plots', "Fig3B.pdf"), rel_junctions_coords, base_width = 5, base_height = 5)
+save_plot(here('..', 'plots', "Fig4B.pdf"), rel_junctions_coords, base_width = 5, base_height = 5)
 
-saveRDS(rel_junctions_coords, here('..', 'plots', 'Fig3B.rds'))
+saveRDS(rel_junctions_coords, here('..', 'plots', 'Fig4B.rds'))
 
 junction_sites <- group_by(junction_features, species, structural_category, site_category) %>%
   summarise(count = n()) %>%
@@ -493,9 +493,9 @@ junction_structural_plot <- ggplot(filter(junction_sites,
   coord_flip() +
   NULL
 
-save_plot(here('..', 'plots', "Fig3C.pdf"), junction_structural_plot, base_width = 5, base_height = 5)
+save_plot(here('..', 'plots', "Fig4C.pdf"), junction_structural_plot, base_width = 5, base_height = 5)
 
-saveRDS(junction_structural_plot, here('..', 'plots', 'Fig3C.rds'))
+saveRDS(junction_structural_plot, here('..', 'plots', 'Fig4C.rds'))
 
 # junction types
 junction_summary <- left_join(junctions, classifications) %>%
@@ -544,9 +544,9 @@ new_junctions <- ggplot(plot_data) +
   ) +
   NULL
 
-save_plot(here('..', 'plots', "Fig3A.pdf"), new_junctions, base_width = 6, base_height = 4)
+save_plot(here('..', 'plots', "Fig4A.pdf"), new_junctions, base_width = 6, base_height = 4)
 
-fig3 <- plot_grid(new_junctions + theme(legend.position = "right",
+fig4 <- plot_grid(new_junctions + theme(legend.position = "right",
                                         legend.text = element_text(size = 8)),
                   rel_junctions_coords + theme(legend.position = "right",
                                                legend.text = element_text(size = 8),
@@ -557,7 +557,7 @@ fig3 <- plot_grid(new_junctions + theme(legend.position = "right",
                   nrow = 3, align = "v", axis = "lr", rel_heights = c(1, 1, 0.75), 
                   labels = "AUTO", label_size = 12)
 
-save_plot(here('..', 'plots', "Fig3.pdf"), fig3, base_width = 6.5, base_height = 8)
-save_plot(here('..', 'plots', "Fig3.png"), fig3, base_width = 6.5, base_height = 8)
+save_plot(here('..', 'plots', "Fig4.pdf"), fig4, base_width = 6.5, base_height = 8)
+save_plot(here('..', 'plots', "Fig4.png"), fig4, base_width = 6.5, base_height = 8)
 
-saveRDS(junctions_by_structure, here('..', 'plots', "Fig3.rds"))
+saveRDS(junctions_by_structure, here('..', 'plots', "Fig4.rds"))

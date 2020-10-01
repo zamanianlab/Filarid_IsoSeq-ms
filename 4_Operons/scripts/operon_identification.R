@@ -253,8 +253,9 @@ final_operons <- curated_operons %>%
   )) %>% 
   filter(!is.na(operon_type)) %>% 
   select(operon_id, operon_type) %>%
-  distinct() %>% 
-  bind_rows(., 
+  distinct()
+
+final_operons <- bind_rows(final_operons, 
             distinct(select(filter(ungroup(assembly_operons), !operon_id %in% final_operons$operon_id),
                    operon_id) %>% mutate(operon_type = 'Assembly'))) %>% 
   mutate(species = 'B. malayi')
@@ -263,7 +264,7 @@ final_operonic_genes <- left_join(final_operons, bind_rows(assembly_operons, sel
   mutate(operon_id = as.character(operon_id)) %>% 
   distinct()
 
-saveRDS(final_operonic_genes, here('..', 'data', "final_operonic_genes.rds"))
+# saveRDS(final_operonic_genes, here('..', 'data', "final_operonic_genes.rds"))
 
 # get all the genes that aren't in operons
 non_operonic_genes <- filter(cds_start_end, !gene_id %in% final_operonic_genes$gene_id) %>%
@@ -405,7 +406,7 @@ saveRDS(comparison, here('..', 'plots', "Fig5A.rds"))
 (ortholog_plot <- ggplot(ortholog_summary) +
     geom_col(aes(x = ortholog_type, y = total_genes, fill = factor(operon_type, levels = c('Novel', 'Shared', 'Assembly'))),
              alpha = 0.95) +
-    labs(y = "Total Genes") +
+    labs(y = "Total *B. malayi* Genes") +
     scale_fill_manual(values = c(lacroix_palette("PassionFruit", 3)),
                       labels = c('New', 'Iso-Seq confirmed', 'Assembly annotated')) +
     scale_x_discrete(labels = c("No\nOrthologs", "Orthologous;\nOperonic", "Orthologous;\nNon-operonic")) +
@@ -413,6 +414,7 @@ saveRDS(comparison, here('..', 'plots', "Fig5A.rds"))
     theme_minimal() +
     theme(
       axis.line = element_line(size = 0.3),
+      axis.title.y = element_markdown(),
       axis.title.x = element_blank(),
       legend.text = element_markdown(),
       legend.position = "top",

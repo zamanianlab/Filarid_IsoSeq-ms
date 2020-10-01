@@ -64,7 +64,7 @@ targets_collapsed <- group_by(targets_tidy, gene_id, transcript_id, name, type, 
   summarize(supporting_reads = n())
 
 
-##### Figure 6
+##### Figure 7
 
 # slo-1 -------------------------------------------------------------------
 
@@ -137,8 +137,8 @@ slo_1_label <- tribble(~sex, ~x, ~y, ~label,
     NULL
 )
 
-save_plot(here('..', 'plots', 'Fig6A.pdf'), slo_1_viewer, base_width = 4)
-saveRDS(slo_1_viewer, here('..', 'plots', 'Fig6A.rds'))
+save_plot(here('..', 'plots', 'Fig7A.pdf'), slo_1_viewer, base_width = 4)
+saveRDS(slo_1_viewer, here('..', 'plots', 'Fig7A.rds'))
 
 # osm-9 ---------------------------------------------------------------
 
@@ -185,8 +185,8 @@ osm_9_label <- tribble(~x, ~y, ~label,
     NULL
 )
 
-save_plot(here('..', 'plots', 'Fig6B.pdf'), osm_9_viewer, base_width = 4)
-saveRDS(osm_9_viewer, here('..', 'plots', 'Fig6B.rds'))
+save_plot(here('..', 'plots', 'Fig7B.pdf'), osm_9_viewer, base_width = 4)
+saveRDS(osm_9_viewer, here('..', 'plots', 'Fig7B.rds'))
 
 # gar-3 ---------------------------------------------------------------
 
@@ -234,8 +234,8 @@ gar_3_label <- tribble(~x, ~y, ~label,
     NULL
 )
 
-save_plot(here('..', 'plots', 'Fig6C.pdf'), gar_3_viewer, base_width = 4)
-saveRDS(gar_3_viewer, here('..', 'plots', 'Fig6C.rds'))
+save_plot(here('..', 'plots', 'Fig7C.pdf'), gar_3_viewer, base_width = 4)
+saveRDS(gar_3_viewer, here('..', 'plots', 'Fig7C.rds'))
 
 # Bm17517 ------------------------------------------------------------------
 
@@ -290,11 +290,11 @@ Bm17517_label <- tribble(~x, ~y, ~label,
     NULL
 )
 
-save_plot(here('..', 'plots', 'Fig6D.pdf'), Bm17517_viewer, base_width = 4)
-saveRDS(Bm17517_viewer, here('..', 'plots', 'Fig6D.rds'))
+save_plot(here('..', 'plots', 'Fig7D.pdf'), Bm17517_viewer, base_width = 4)
+saveRDS(Bm17517_viewer, here('..', 'plots', 'Fig7D.rds'))
 
 
-# Fig 1 -------------------------------------------------------------------
+# Fig 7 -------------------------------------------------------------------
 
 legend <- get_legend(slo_1_viewer + theme(legend.title = element_blank(),
                                           legend.text = element_text(size = 8)))
@@ -312,7 +312,7 @@ panel <- plot_grid(slo_1_viewer + theme(legend.position = "none"),
 
 panel_legend <- plot_grid(panel, legend, nrow = 2, rel_heights = c(1, 0.1), scale = 0.96)
 
-save_plot(here('..', 'plots', "Fig6.pdf"), panel_legend, base_width = 7.5, base_height = 7)
+save_plot(here('..', 'plots', "Fig7.pdf"), panel_legend, base_width = 7.5, base_height = 7)
 
 ##### Supplements
 

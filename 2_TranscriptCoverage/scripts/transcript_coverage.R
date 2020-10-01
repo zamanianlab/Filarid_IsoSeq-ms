@@ -99,6 +99,6 @@ line_plot <- ggplot(gene_reduced, aes(x = index_norm, y = depth_norm)) +
   ) +
   NULL
 
-save_plot(here('..', 'plots', 'Fig1D.pdf'), line_plot, base_height = 4, base_width = 4)
+save_plot(here('..', 'plots', 'Fig2D.pdf'), line_plot, base_height = 4, base_width = 4)
 
-saveRDS(line_plot, here('..', 'plots', 'Fig1D.rds'))
+saveRDS(line_plot, here('..', 'plots', 'Fig2D.rds'))

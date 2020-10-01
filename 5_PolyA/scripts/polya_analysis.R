@@ -48,8 +48,8 @@ length_data <- bind_rows(bm_length_data %>% mutate(species = "*B. malayi*"),
     NULL
 )
 
-save_plot(here('..', 'plots', 'Fig5A.pdf'), polya_plot, base_width = 3)
-saveRDS(polya_plot, here('..', 'plots', 'Fig5A.rds'))
+save_plot(here('..', 'plots', 'Fig6A.pdf'), polya_plot, base_width = 3)
+saveRDS(polya_plot, here('..', 'plots', 'Fig6A.rds'))
 
 # kmers -------------------------------------------------------------------
 
@@ -138,8 +138,8 @@ palette <- viridisLite::viridis(length(pas_plot_data$kmer))
     NULL
 )
 
-save_plot(here('..', 'plots', 'Fig5B.pdf'), isoform_plot, base_width = 3)
-saveRDS(isoform_plot, here('..', 'plots', 'Fig5B.rds'))
+save_plot(here('..', 'plots', 'Fig6B.pdf'), isoform_plot, base_width = 3)
+saveRDS(isoform_plot, here('..', 'plots', 'Fig6B.rds'))
 
 # plot location of the PAS with respect to the 3' end of the PAS
 pas_index_summary <- read_csv(here("..", 'data', "bm_all_transcripts_trim_PAS.csv"), 
@@ -166,8 +166,8 @@ pas_index_summary <- read_csv(here("..", 'data', "bm_all_transcripts_trim_PAS.cs
     NULL
   )
 
-save_plot(here('..', 'plots', 'Fig5C.pdf'), index_plot, base_width = 3)
-saveRDS(index_plot, here('..', 'plots', 'Fig5C.rds'))
+save_plot(here('..', 'plots', 'Fig6C.pdf'), index_plot, base_width = 3)
+saveRDS(index_plot, here('..', 'plots', 'Fig6C.rds'))
 
 pas_nest <- read_csv(here("..", 'data', "bm_all_transcripts_trim_PAS.csv"), 
                      col_names = c("null", "isoform", "3'_sequence", "kmer", "index"),
@@ -227,8 +227,8 @@ pssm <- left_join(pssm, pssm_summary) %>%
     NULL
   )
 
-save_plot(here('..', 'plots', 'Fig5D.pdf'), freq, base_width = 3)
-saveRDS(freq, here('..', 'plots', 'Fig5D.rds'))
+save_plot(here('..', 'plots', 'Fig6D.pdf'), freq, base_width = 3)
+saveRDS(freq, here('..', 'plots', 'Fig6D.rds'))
 
 # Final plotting ----------------------------------------------------------
 
@@ -238,39 +238,6 @@ middle <- isoform_plot / index_plot
 left <- polya_plot + middle
 final <- left + freq + plot_annotation(tag_levels = 'A') & theme(plot.tag = element_text(face = 'bold'))
 
-save_plot(here('..', 'plots', "Fig5.pdf"), final, base_height = 7.5, base_width = 7.5)
-save_plot(here('..', 'plots', "Fig5.png"), final, base_height = 7.5, base_width = 7.5)
+save_plot(here('..', 'plots', "Fig6.pdf"), final, base_height = 7.5, base_width = 7.5)
+save_plot(here('..', 'plots', "Fig6.png"), final, base_height = 7.5, base_width = 7.5)
 
-
-
-
-
-# D. immitis --------------------------------------------------------------
-
-(polya_plot <- ggplot(filter(length_data, species == "*B. malayi")) +
-   geom_histogram(aes(x = polya_length, y = ..density..), center = median(length_data$polya_length), mutate(length_data, z = FALSE), bins = 250) +
-   geom_histogram(aes(x = polya_length, y = ..density..), center = median(length_data$polya_length), mutate(length_data, z = TRUE), bins = 500) +
-   geom_vline(aes(xintercept = median(length_data$polya_length)), mutate(length_data, z = TRUE), color = "red", linetype = "dashed") + # this add several seconds to the plotting
-   facet_zoom(xlim = c(15, 50), ylim = c(0, 0.15), horizontal = FALSE, zoom.data = z) +
-   labs(x = "poly(A) Tail Length", y = "Density") +
-   theme_minimal() +
-   theme(zoom.y = element_blank(),
-         strip.background = element_rect(fill = "lightgrey", linetype = "dashed"),
-         validate = FALSE) +
-   NULL
-)
-
-save_plot(here('..', 'plots', 'Fig5A.pdf'), polya_plot, base_width = 3)
-saveRDS(polya_plot, here('..', 'plots', 'Fig5A.rds'))
-
-(isoform_plot <- ggplot(filter(pas_plot_data, species == "*B. malayi*"), 
-                        aes(x = kmer, y = genes_with_kmer / sum(filter(pas_index, species == "*B. malayi*")$genes_with_kmer))) +
-    geom_col(aes(fill = kmer)) +
-    labs(x = "", y = "Fraction CCSs with PAS") + 
-    scale_fill_manual(values = palette) +
-    theme_minimal() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1),
-          axis.title.x = element_blank(),
-          legend.position = "none") +
-    NULL
-)
