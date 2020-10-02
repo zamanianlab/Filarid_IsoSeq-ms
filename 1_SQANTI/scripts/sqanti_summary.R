@@ -13,7 +13,7 @@ library(LaCroixColoR)
 # misc
 library(conflicted)
 
-# project managment
+# project management
 library(here)
 
 # conflict resolution
@@ -127,7 +127,7 @@ total <- group_by(classifications, species, sex) %>%
   mutate(y = c(45000, 18000, 50000, 18000))
 
 ccs_by_sex <- ggplot(total) +
-  geom_bar(aes(x = species, y = total, fill = sex), stat = "identity", alpha = 0.95) +
+  geom_bar(aes(x = species, y = total, fill = sex), stat = "identity") +
   geom_text(aes(x = species, y = y, label = total),
              color = "white", size = 3) +
   scale_fill_manual(limits = c("AF", "AM"), values = peach) +
@@ -310,7 +310,7 @@ extended_five <- ggplot(classifications,
   scale_fill_manual(values = fsm_ism_palette) +
   scale_x_continuous(limits = c(-1000, 1000), breaks = c(-500, 0, 500), minor_breaks = NULL) +
   scale_y_continuous(limits = c(0, 5000), expand = c(0, 0)) +
-  labs(x = "Distance of CCS Start to TSS", y = "Filtered CCSs") +
+  labs(x = "Distance of read start to TSS", y = "Filtered Reads") +
   annotate("segment", x = -50, xend = -690, y = 4000, yend = 4000, color = "grey40", size = 0.5, arrow = arrow(type = 'closed', length = unit(0.30, "cm"))) +
   annotate("text", x = -550, y = 4600, label = "Extends 5' UTR", size = 3) +
   facet_grid(cols = vars(species)) +
@@ -345,7 +345,7 @@ extended_three <- ggplot(classifications,
   scale_color_manual(values = fsm_ism_palette) +
   scale_x_reverse(limits = c(1000, -1000), breaks = c(-500, 0, 500), minor_breaks = NULL) +
   scale_y_continuous(limits = c(0, 5000), expand = c(0, 0)) +
-  labs(x = "Distance of CCS End to TTS", y = "Filtered CCSs") +
+  labs(x = "Distance of read end to TTS", y = "Filtered Reads") +
   annotate("segment", x = -50, xend = -690, y = 4000, yend = 4000, color = "grey40", size = 0.5, arrow = arrow(type = 'closed', length = unit(0.30, "cm"))) +
   annotate("text", x = -550, y = 4600, label = "Extends 3' UTR", size = 3) +
   facet_grid(cols = vars(species)) +
@@ -455,7 +455,7 @@ rel_junctions_coords <- ggplot(filter(junction_features,
   scale_y_discrete(limits = c("Full-Splice Match", "Incomplete-Splice Match", "Novel Not In Catalog", "Novel In Catalog"),
                    expand = expansion(add = c(0, 1.05))) +
   scale_x_continuous(limits = c(0, 1), expand = c(0, 0)) +
-  labs(x = "Splice Junction Postion on CCS", y = "Fraction Total", fill = "Structural Category") +
+  labs(x = "Splice Junction Postion on Read", y = "Fraction Total", fill = "Structural Category") +
   theme_minimal(base_family = "Helvetica", base_size = 12) +
   theme(axis.line = element_line(size = 0.3),
         axis.ticks.x = element_line(size = 0.25),
@@ -484,7 +484,7 @@ junction_structural_plot <- ggplot(filter(junction_sites,
   scale_y_continuous(expand = c(0, 0)) +
   scale_fill_manual(values = lacroix_palette("PassionFruit", n = 6), 
                     labels = c("0-40", "41-80", "81-120", "121-160", "161-200", ">200")) +
-  labs(y = "Fraction Total", fill = "Splice Junction\nPosition on CCS (nt)") +
+  labs(y = "Fraction Total", fill = "Splice Junction\nPosition on Read (nt)") +
   theme_minimal(base_family = "Helvetica", base_size = 12) +
   theme(axis.line = element_line(size = 0.3),
         axis.ticks.y = element_line(size = 0.25),
@@ -561,3 +561,29 @@ save_plot(here('..', 'plots', "Fig4.pdf"), fig4, base_width = 6.5, base_height =
 save_plot(here('..', 'plots', "Fig4.png"), fig4, base_width = 6.5, base_height = 8)
 
 saveRDS(junctions_by_structure, here('..', 'plots', "Fig4.rds"))
+
+
+# Comparison to short-read RNA-seq ----------------------------------------
+
+rnaseq <- readRDS(here('..', '..', '4_Operons', 'data', 'staged_RNAseq.rds')) %>% 
+  janitor::clean_names() %>% 
+  filter(metric == 'TPM_g')
+
+adult_transcripts <- rnaseq %>% 
+  group_by(gene_id) %>% 
+  filter(dev_stage_s == 'Adult') %>% 
+  summarise(mean_expression = mean(expression)) %>% 
+  filter(mean_expression > 10)
+
+sum(filter(gene_summary, species == "*B. malayi*")$genes_per_sex) / length(adult_transcripts$gene_id)
+
+comparison <- bm_classifications %>% 
+  filter(str_detect(associated_gene, 'WBGene') == TRUE, str_detect(associated_gene, '_') == FALSE) %>% 
+  group_by(associated_gene) %>% 
+  summarise(ccs_count = n()) %>% 
+  rename(gene_id = associated_gene) %>% 
+  left_join(., select(adult_transcripts, gene_id, mean_expression))
+ 
+  
+cor.test(x = comparison$ccs_count, y = comparison$mean_expression)
+             

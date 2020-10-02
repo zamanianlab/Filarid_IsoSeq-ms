@@ -384,7 +384,7 @@ plot_operons <- bind_rows(final_operonic_genes, non_operonic_genes, ce_operons_c
 
 # stacked bar comparing operons already annotated in assembly and new/shared operons from Iso-Seq
 (comparison <- ggplot(plot_operons, aes(x = species, fill = operon_type)) +
-    geom_bar(alpha = 0.95) +
+    geom_bar() +
     scale_fill_manual(values = c(lacroix_palette("PassionFruit", 3), 'grey'), labels = c('Novel', 'Iso-Seq confirmed', 'Assembly annotated', 'Non-operonic')) +
     scale_y_continuous(expand = c(0, 0)) +
     labs(y = "Total Genes") +
@@ -404,8 +404,7 @@ saveRDS(comparison, here('..', 'plots', "Fig5A.rds"))
 
 # stacked bar of which cistrons have orthologs in Ce
 (ortholog_plot <- ggplot(ortholog_summary) +
-    geom_col(aes(x = ortholog_type, y = total_genes, fill = factor(operon_type, levels = c('Novel', 'Shared', 'Assembly'))),
-             alpha = 0.95) +
+    geom_col(aes(x = ortholog_type, y = total_genes, fill = factor(operon_type, levels = c('Novel', 'Shared', 'Assembly')))) +
     labs(y = "Total *B. malayi* Genes") +
     scale_fill_manual(values = c(lacroix_palette("PassionFruit", 3)),
                       labels = c('New', 'Iso-Seq confirmed', 'Assembly annotated')) +
@@ -435,7 +434,7 @@ type_median <- filter(plot_operons, species == "B. malayi") %>%
 # comparison of intergenic distances between operonic cistrons and monocistronic genes
 (type_histogram <- ggplot(data = (filter(plot_operons, species == "B. malayi", cistron %in% c(NA, 1)) %>%
                                     mutate(operon_type = fct_rev(operon_type)))) +
-    geom_histogram(aes(x = distance, fill = operon_type), alpha = 0.95, bins = 25) +
+    geom_histogram(aes(x = distance, fill = operon_type), bins = 25) +
     geom_vline(data = type_median, aes(xintercept = median, color = operon_type), linetype = "dashed", size = 1) +
     scale_x_continuous(limits = c(0, 11000), expand = c(0, 0)) +
     scale_y_continuous(expand = c(0, 0)) +
@@ -466,7 +465,7 @@ plot_operons <- plot_operons %>%
   mutate(species = fct_rev(species))
 
 (species_histogram <- ggplot(filter(plot_operons, operon_type != "Monocistron", cistron %in% c(NA, 1))) +
-    geom_density(aes(x = distance, y = ..density.., fill = species), alpha = 0.95) +
+    geom_density(aes(x = distance, y = ..density.., fill = species)) +
     geom_vline(data = species_median, aes(xintercept = median, color = species), linetype = "dashed", size = 1) +
     scale_x_continuous(limits = c(0, 5000), expand = c(0, 0)) +
     scale_y_continuous(expand = c(0, 0)) +
@@ -475,7 +474,7 @@ plot_operons <- plot_operons %>%
     ) +
     scale_color_manual(values = rev(c('orange', 'purple')),
                        labels = NULL, guide = "none") +
-    labs(x = "Distance between genes", y = "Density", fill = "type") +
+    labs(x = "Distance Between Genes", y = "Density", fill = "type") +
     theme_minimal() +
     theme(
       axis.line = element_line(size = 0.3),

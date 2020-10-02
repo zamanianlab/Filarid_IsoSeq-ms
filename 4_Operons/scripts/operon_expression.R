@@ -15,7 +15,7 @@ library(broom)
 # misc
 library(conflicted)
 
-# project managment
+# project management
 library(here)
 
 # conflict resolution
@@ -167,7 +167,7 @@ example_line <- left_join(example, lm_tidied) %>%
 
 (example_plot <- ggplot(example, aes(x = cistron_1, y = cistron_2)) +
     geom_abline(data = example_line, aes(slope = cistron_1, intercept = intercept, color = type)) +
-    geom_point(aes(color = type), size = 6, alpha = 0.9) +
+    geom_point(aes(color = type), size = 6) +
     geom_text(aes(label = label), color = 'white', fontface = 'bold', size = 2) +
     geom_richtext(data = example_line, aes(x = x, y = y, color = type,
                                            label = paste(expression(R^2), " = ", round(r.squared, 4))),
@@ -188,8 +188,7 @@ save_plot(here('..', 'plots', "Fig5E.pdf"), example_plot, base_height = 5, base_
 saveRDS(example_plot, here('..', 'plots', "Fig5E.rds"))
 
 (rsquare_plot <- ggplot(filter(lm_glanced, !is.na(r.squared))) +
-    geom_density_ridges(aes(x = r.squared, y = type, fill = type, height = ..density..),
-                        alpha = 0.95
+    geom_density_ridges(aes(x = r.squared, y = type, fill = type, height = ..density..)
     ) +
     scale_fill_manual(values = c('black', 'grey'), labels = c("Operon", "Pseudo-Operon")) +
     scale_y_discrete(limits = c("operon", "pseudooperon"), labels = c("Operon", "Pseudo-\noperon"), expand = expansion(c(0, 2))) +
@@ -209,12 +208,12 @@ save_plot(here('..', 'plots', "Fig5F.pdf"), rsquare_plot, base_height = 3, base_
 saveRDS(rsquare_plot, here('..', 'plots', "Fig5F.rds"))
 
 (rsquare_distance <- ggplot(filter(lm_glanced, !is.na(statistic), !is.na(distance)), aes(x = distance_bin, y = r.squared)) +
-    gghalves::geom_half_boxplot(aes(fill = type), position = 'dodge', outlier.shape = NA, alpha = 0.9) +
-    gghalves::geom_half_point(aes(color = type), transformation = position_jitter(height = 0), alpha = 0.7) +
+    gghalves::geom_half_boxplot(aes(fill = type), position = 'dodge', outlier.shape = NA) +
+    gghalves::geom_half_point(aes(color = type), transformation = position_jitter(height = 0)) +
     scale_fill_manual(values = c('black', 'grey')) +
     scale_color_manual(values = c('black', 'grey')) +
     scale_x_discrete(labels = c('0-500', '501-1000', '1001-1500', '1501-2000', '>2000')) +
-    labs(x = "Distance between genes (bp)", y = expression(R^2)) +
+    labs(x = "Distance Between Genes", y = expression(R^2)) +
     theme_minimal() +
     theme(
       axis.line = element_line(size = 0.3),

@@ -140,5 +140,5 @@ plot_data <- select(all_go_data, result) %>%
     theme(legend.position = "right")
 )
 
-save_plot(here('..', 'plots', 'S6_Fig.pdf'), plot, base_height = 6, base_width = 8)
-save_plot(here('..', 'plots', 'S6_Fig.png'), plot, base_height = 6, base_width = 8)
+save_plot(here('..', 'plots', 'S1_Fig.pdf'), plot, base_height = 6, base_width = 8)
+save_plot(here('..', 'plots', 'S1_Fig.png'), plot, base_height = 6, base_width = 8)

@@ -48,7 +48,7 @@ bed <- readRDS(here('..', 'data', "brugia_malayi_gene_intersects.rds")) %>%
   mutate(start = start + 1) # change from base-0 to base-1
 
 # CSV of target metadata
-targets <- read_delim(here('..', 'data', "S4_Table.csv"),
+targets <- read_delim(here('..', 'data', "S6_Table.csv"),
                       delim = ",",
                       col_names = TRUE)
 

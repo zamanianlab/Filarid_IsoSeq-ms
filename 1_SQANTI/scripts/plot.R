@@ -14,7 +14,7 @@ b <- readRDS(here('..', 'plots', 'Fig2B.rds')) + theme(axis.title.y = element_te
 c <- readRDS(here('..', 'plots', 'Fig2C.rds')) + theme(axis.title.y = element_text(size = 10),
                                                        strip.text.x = element_markdown(size = 8),
                                                        axis.text = element_text(size = 8))
-d <- readRDS(here('..', '..', '2_TranscriptCoverage', 'plots', 'Fig1D.rds')) + theme(axis.title.y = element_text(size = 10),
+d <- readRDS(here('..', '..', '2_TranscriptCoverage', 'plots', 'Fig2D.rds')) + theme(axis.title.y = element_text(size = 10),
                                                                                      axis.title.x = element_text(size = 8),
                                                                                      strip.text.x = element_markdown(size = 8),
                                                                                      axis.text = element_text(size = 8))
